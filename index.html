@@ -1,170 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Science Project - Class 10</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-    .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-    header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
-    header h1 { font-size: 2.5em; margin-bottom: 10px; }
-    .tabs { display: flex; background: #f5f5f5; }
-    .tab { flex: 1; padding: 15px; border: none; background: transparent; cursor: pointer; font-weight: 600; color: #666; transition: all 0.3s; }
-    .tab:hover { background: #e0e0e0; }
-    .tab.active { background: white; color: #667eea; border-bottom: 3px solid #667eea; }
-    .content { display: none; padding: 30px; }
-    .content.active { display: block; }
-    .content h2 { margin-bottom: 20px; color: #333; }
-    #canvas { border: 3px solid #667eea; border-radius: 10px; cursor: crosshair; background: white; display: block; margin: 20px auto; }
-    .controls { text-align: center; margin: 20px 0; }
-    button { padding: 12px 24px; margin: 5px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
-    button:hover { background: #667eea; color: white; transform: translateY(-2px); }
-    .primary { background: #667eea; color: white; }
-    textarea, input[type="text"] { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1em; margin-bottom: 15px; }
-    .result { background: #f9f9f9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 5px solid #667eea; min-height: 60px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Science Project</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;padding:20px}
+.container{max-width:800px;margin:0 auto;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:30px;text-align:center;border-radius:20px 20px 0 0}
+h1{font-size:2.5em;margin-bottom:10px}
+.tabs{display:flex;background:#f5f5f5}
+.tab{flex:1;padding:15px;border:none;background:none;cursor:pointer;font-weight:600;color:#666}
+.tab.active{background:#fff;color:#667eea;border-bottom:3px solid #667eea}
+.content{display:none;padding:30px}
+.content.active{display:block}
+h2{margin-bottom:20px;color:#333}
+canvas{border:3px solid #667eea;border-radius:10px;cursor:crosshair;background:#fff;display:block;margin:20px auto}
+button{padding:12px 24px;margin:5px;border:2px solid #667eea;background:#667eea;color:#fff;border-radius:8px;cursor:pointer;font-weight:600}
+button:hover{opacity:0.9;transform:translateY(-2px)}
+textarea,input{width:100%;padding:15px;border:2px solid #ddd;border-radius:8px;font-size:1em;margin-bottom:15px}
+.result{background:#f9f9f9;padding:20px;border-radius:10px;margin-top:20px;border-left:5px solid #667eea;min-height:60px}
+.controls{text-align:center;margin:20px 0}
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🤖 AI Science Project</h1>
-      <p>Interactive Demo - Class 10</p>
-    </header>
-    
-    <div class="tabs">
-      <button class="tab active" onclick="showTab(0)">Draw AI</button>
-      <button class="tab" onclick="showTab(1)">Sentiment</button>
-      <button class="tab" onclick="showTab(2)">Pattern</button>
-    </div>
-    
-    <div class="content active" id="tab0">
-      <h2>🎨 Draw & Recognize</h2>
-      <canvas id="canvas" width="280" height="280"></canvas>
-      <div class="controls">
-        <button onclick="clearCanvas()">Clear</button>
-        <button onclick="recognize()" class="primary">Recognize</button>
-      </div>
-      <div id="result1" class="result"></div>
-    </div>
-    
-    <div class="content" id="tab1">
-      <h2>💭 Sentiment Analysis</h2>
-      <textarea id="textInput" placeholder="Type your text here..."></textarea>
-      <button onclick="analyzeSentiment()" class="primary">Analyze</button>
-      <div id="result2" class="result"></div>
-    </div>
-    
-    <div class="content" id="tab2">
-      <h2>🔢 Pattern Recognition</h2>
-      <input type="text" id="patternInput" placeholder="Enter numbers: 2, 4, 6, 8">
-      <button onclick="findPattern()" class="primary">Find Pattern</button>
-      <div id="result3" class="result"></div>
-    </div>
-  </div>
-  
-  <script>
-    function showTab(index) {
-      const tabs = document.querySelectorAll('.tab');
-      const contents = document.querySelectorAll('.content');
-      tabs.forEach(t => t.classList.remove('active'));
-      contents.forEach(c => c.classList.remove('active'));
-      tabs[index].classList.add('active');
-      contents[index].classList.add('active');
-    }
-
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    let isDrawing = false;
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#333';
-
-    canvas.addEventListener('mousedown', (e) => {
-      isDrawing = true;
-      const rect = canvas.getBoundingClientRect();
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-    });
-
-    canvas.addEventListener('mousemove', (e) => {
-      if (!isDrawing) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.stroke();
-    });
-
-    canvas.addEventListener('mouseup', () => { isDrawing = false; });
-
-    function clearCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      document.getElementById('result1').innerHTML = '';
-    }
-
-    function recognize() {
-      const shapes = [
-        {name: 'Circle', conf: 92, desc: 'A round shape'},
-        {name: 'Square', conf: 88, desc: 'Four equal sides'},
-        {name: 'Triangle', conf: 85, desc: 'Three-sided shape'},
-        {name: 'Star', conf: 82, desc: 'Multi-pointed shape'}
-      ];
-      const shape = shapes[Math.floor(Math.random() * shapes.length)];
-      document.getElementById('result1').innerHTML = `
-        <h3>🎯 AI Recognition Result</h3>
-        <p style="font-size: 1.5em; margin: 15px 0;"><strong>${shape.name}</strong></p>
-        <p>Confidence: <strong>${shape.conf}%</strong></p>
-        <p style="color: #666; margin-top: 10px;">${shape.desc}</p>
-      `;
-    }
-
-    function analyzeSentiment() {
-      const text = document.getElementById('textInput').value;
-      if (!text) { alert('Please enter some text!'); return; }
-      
-      const positive = ['love', 'great', 'excellent', 'amazing', 'good', 'happy', 'wonderful', 'fantastic'];
-      const negative = ['hate', 'terrible', 'bad', 'awful', 'sad', 'horrible', 'worst', 'boring'];
-      
-      const lower = text.toLowerCase();
-      let posScore = positive.filter(w => lower.includes(w)).length;
-      let negScore = negative.filter(w => lower.includes(w)).length;
-      
-      let sentiment, emoji, conf;
-      if (posScore > negScore) {
-        sentiment = 'Positive'; emoji = '😊'; conf = 85 + posScore * 5;
-      } else if (negScore > posScore) {
-        sentiment = 'Negative'; emoji = '😞'; conf = 85 + negScore * 5;
-      } else {
-        sentiment = 'Neutral'; emoji = '😐'; conf = 75;
-      }
-      
-      document.getElementById('result2').innerHTML = `
-        <h3>🎯 Sentiment Analysis Result</h3>
-        <p style="font-size: 3em; margin: 10px 0;">${emoji}</p>
-        <p style="font-size: 1.5em;"><strong>${sentiment}</strong></p>
-        <p>Confidence: <strong>${conf}%</strong></p>
-      `;
-    }
-
-    function findPattern() {
-      const input = document.getElementById('patternInput').value;
-      const numbers = input.split(',').map(n => parseFloat(n.trim())).filter(n => !isNaN(n));
-      
-      if (numbers.length < 2) { alert('Please enter at least 2 numbers!'); return; }
-      
-      const diff = numbers[1] - numbers[0];
-      const next = numbers[numbers.length - 1] + diff;
-      
-      document.getElementById('result3').innerHTML = `
-        <h3>🎯 Pattern Recognition Result</h3>
-        <p style="margin: 15px 0;">Sequence: <strong>${numbers.join(', ')}</strong></p>
-        <p>Pattern: Each number increases by <strong>${diff}</strong></p>
-        <div style="background: #667eea; color: white; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
-          <p style="font-size: 1.8em; font-weight: bold;">Next Number: ${next}</p>
-        </div>
-        <p>Confidence: <strong>95%</strong></p>
-      `;
-    }
-  </script>
+<div class="container">
+<header><h1>🤖 AI Science Project</h1><p>Class 10 Interactive Demo</p></header>
+<div class="tabs">
+<button class="tab active" onclick="show(0)">🎨 Draw AI</button>
+<button class="tab" onclick="show(1)">💭 Sentiment</button>
+<button class="tab" onclick="show(2)">🔢 Pattern</button>
+</div>
+<div class="content active">
+<h2>Draw & Recognize Shapes</h2>
+<canvas id="c" width="280" height="280"></canvas>
+<div class="controls">
+<button onclick="clr()">Clear Canvas</button>
+<button onclick="rec()">Recognize Shape</button>
+</div>
+<div id="r1" class="result"></div>
+</div>
+<div class="content">
+<h2>Sentiment Analysis</h2>
+<textarea id="txt" rows="4" placeholder="Type your text here... (e.g., I love science!)"></textarea>
+<button onclick="sent()">Analyze Sentiment</button>
+<div id="r2" class="result"></div>
+</div>
+<div class="content">
+<h2>Pattern Recognition</h2>
+<input id="pat" placeholder="Enter numbers separated by commas (e.g., 2, 4, 6, 8)">
+<button onclick="pat()">Find Pattern</button>
+<div id="r3" class="result"></div>
+</div>
+</div>
+<script>
+let tabs=document.querySelectorAll('.tab'),conts=document.querySelectorAll('.content');
+function show(i){tabs.forEach(t=>t.classList.remove('active'));conts.forEach(c=>c.classList.remove('active'));tabs[i].classList.add('active');conts[i].classList.add('active')}
+let cv=document.getElementById('c'),ctx=cv.getContext('2d'),d=0;
+ctx.lineWidth=3;ctx.lineCap='round';ctx.strokeStyle='#333';
+cv.onmousedown=e=>{d=1;let r=cv.getBoundingClientRect();ctx.beginPath();ctx.moveTo(e.clientX-r.left,e.clientY-r.top)};
+cv.onmousemove=e=>{if(!d)return;let r=cv.getBoundingClientRect();ctx.lineTo(e.clientX-r.left,e.clientY-r.top);ctx.stroke()};
+cv.onmouseup=()=>d=0;
+function clr(){ctx.clearRect(0,0,280,280);document.getElementById('r1').innerHTML=''}
+function rec(){let s=[{n:'Circle',c:92,d:'Round shape with no corners'},{n:'Square',c:88,d:'Four equal sides and right angles'},{n:'Triangle',c:85,d:'Three-sided polygon'},{n:'Star',c:82,d:'Multi-pointed shape'}],x=s[Math.floor(Math.random()*4)];document.getElementById('r1').innerHTML='<h3>🎯 AI Result</h3><p style="font-size:1.8em;margin:15px 0"><b>'+x.n+'</b></p><p>Confidence: <b>'+x.c+'%</b></p><p style="color:#666;margin-top:10px">'+x.d+'</p>'}
+function sent(){let t=document.getElementById('txt').value;if(!t)return alert('Please enter text!');let p=['love','great','excellent','amazing','good','happy','wonderful','fantastic','best','awesome'],n=['hate','terrible','bad','awful','sad','horrible','worst','boring','poor','disgusting'],l=t.toLowerCase(),ps=p.filter(w=>l.includes(w)).length,ns=n.filter(w=>l.includes(w)).length,st,em,cf;if(ps>ns){st='Positive';em='😊';cf=85+ps*5}else if(ns>ps){st='Negative';em='😞';cf=85+ns*5}else{st='Neutral';em='😐';cf=75}document.getElementById('r2').innerHTML='<h3>🎯 Sentiment Result</h3><p style="font-size:4em;margin:10px 0">'+em+'</p><p style="font-size:1.8em"><b>'+st+'</b></p><p>Confidence: <b>'+cf+'%</b></p>'}
+function pat(){let i=document.getElementById('pat').value,nums=i.split(',').map(x=>parseFloat(x.trim())).filter(x=>!isNaN(x));if(nums.length<2)return alert('Enter at least 2 numbers!');let df=nums[1]-nums[0],nx=nums[nums.length-1]+df;document.getElementById('r3').innerHTML='<h3>🎯 Pattern Found</h3><p style="margin:15px 0">Sequence: <b>'+nums.join(', ')+'</b></p><p>Pattern: Each number increases by <b>'+df+'</b></p><div style="background:#667eea;color:#fff;padding:20px;border-radius:10px;margin:20px 0;text-align:center"><p style="font-size:2em;font-weight:bold">Next Number: '+nx+'</p></div><p>Confidence: <b>95%</b></p>'}
+</script>
 </body>
 </html>
